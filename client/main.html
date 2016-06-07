@@ -1,0 +1,167 @@
+<head>
+  <title>simple</title>
+</head>
+
+<body>
+<style>
+    .container{
+        margin: 10rem;
+        position: relative;
+    }
+
+    .menu_bar{
+        position: absolute;
+        background-color: lightgray;
+        float: left;
+        /*display: flex;*/
+        /*flex-wrap: nowrap*/
+    }
+
+    .menu_bar .btn{
+        width: 3rem;
+        height:3rem;
+        margin: 0.1rem 0 0.1rem 0.2rem;
+    }
+
+    .menu_bar .move_bar{
+        width: 1.5rem;
+        height: 3rem;
+        background-color: black;
+        /*float: left;*/
+    }
+
+    .menu_bar .toggle_btn{
+        margin-left: 0.1rem;
+        width: 1.5rem;
+        height: 3rem;
+        background-color: yellowgreen;
+        /*float: left;*/
+    }
+
+    .menu_bar .rotate_btn{
+        margin: 0 0.5rem 0 0.1rem;
+        width: 1.5rem;
+        height: 3rem;
+        background-color: indianred;
+        /*float: left;*/
+    }
+
+
+    .flex{
+        display: -webkit-flex;
+        display: flex;
+    }
+
+    .flex_row{
+        flex-direction: row;
+        flex-wrap: nowrap
+    }
+
+    .flex_column{
+        flex-direction: column;
+    }
+    .btn_hide{
+        position: absolute;
+        top:3rem;
+    }
+
+    .hd{display: none;}
+    /*.btn_show:hover div{display: block;}*/
+
+
+</style>
+
+    <div class="container">
+        {{> menu_bar}}
+    </div>
+
+<script type="text/javascript">
+
+    var fatherContainer;
+    var mouseOffsetX = 0; //偏移
+    var mouseOffsetY = 0;
+    var isDraging = false; //是否可拖拽的标记
+
+    // 鼠标事件1 - 在标题栏上按下（要计算鼠标相对拖拽元素的左上角的坐标，并且标记元素为可拖动）
+    $(".move_bar").mousedown(function (e) {
+        console.log(e);
+        fatherContainer = $(this).parent();
+        console.log(fatherContainer);
+        var e = e || window.event;
+        mouseOffsetX = e.pageX - fatherContainer.offset().left;
+        mouseOffsetY = e.pageY - fatherContainer.offset().top;
+        console.log(mouseOffsetX);
+        isDraging = true;
+
+    });
+
+    // 鼠标事件2 - 鼠标移动时（要检测，元素是否可标记为移动，如果是，则更新元素的位置【PS：要减去第一步中获得的偏移】）
+    document.onmousemove = function (e) {
+        var mouseX = e.pageX; //鼠标当前位置
+        var mouseY = e.pageY;
+        var moveX = 0;
+        var moveY = 0;
+        if(isDraging == true){
+            moveX = mouseX - mouseOffsetX;
+            moveY = mouseY - mouseOffsetY;
+
+            var maxX = document.documentElement.clientWidth - fatherContainer.width();
+            var maxY = document.documentElement.clientHeight - fatherContainer.height();
+
+            moveX = Math.min( maxX , Math.max(0,moveX)) ;
+            moveY = Math.min( maxY , Math.max(0,moveY)) ;
+            console.log(maxX);
+//            console.log(moveX);
+            fatherContainer.offset({top:moveY,left:moveX});
+        }
+    };
+    // 鼠标事件3 - 鼠标松开的时候（标记元素为不可拖动）
+    document.onmouseup = function () {
+        isDraging = false;
+    };
+$(function () {
+    $('[data-toggle="popover"]').popover(); //初始化Bootstrap插件
+
+    $(".toggle_btn").click(function () {
+        $(this).siblings(".btn-toolbar").animate({width :'toggle'},500)
+    });
+
+    $(".rotate_btn").click(function () {
+        $(this).siblings(".btn-toolbar").toggleClass("flex_row flex_column");
+        $(this).parent().toggleClass("flex_row flex_column");
+    });
+//子菜单显示隐藏
+    $(".btn_show").mouseover(function(){
+        $(this).children(".btn_hide").toggleClass("hd");
+    });
+    $(".btn_show").mouseout(function(){
+        $(this).children(".btn_hide").toggleClass("hd");
+    });
+})
+
+</script>
+</body>
+
+<template name="menu_bar">
+    <div class="menu_bar flex flex_row">
+        <div class="move_bar"></div>
+        <div class="toggle_btn"></div>
+        <div class="rotate_btn"></div>
+        <div class="btn-toolbar flex flex_row" data-toggle="buttons" role="toolbar">
+            <li style="display: block;position: relative;" class="btn_show">
+                <button type="button" title="测试" class="btn btn-default ">1</button>
+                <div class="btn-toolbar flex flex_row btn_hide hd" data-toggle="buttons" role="toolbar">
+                    <button type="button" class="btn btn-default">1-1</button>
+                    <button type="button" class="btn btn-default">1-2</button>
+                </div>
+            </li>
+            <li style="display: block;"><button type="button" class="btn btn-default">2</button></li>
+            <button type="button" class="btn btn-default">3</button>
+        </div>
+
+    </div>
+
+
+</template>
+
+
