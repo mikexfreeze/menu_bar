@@ -11,6 +11,13 @@
         border-radius: 0px;
     }
 
+    .btn:focus,
+    .btn:active:focus,
+    .btn.active:focus,
+    .btn.focus,
+    .btn:active.focus,
+    .btn.active.focus {outline: none;}
+
     p {
         margin: 0px;
     }
@@ -96,6 +103,7 @@
 
     .transverse .dividing_line{
         margin-left: 8px;
+        margin-right: 6px;
         width: 0px;
         height: 40px;
         border-left: solid 1px #2d253b;
@@ -126,6 +134,7 @@
 
     .vertical .dividing_line{
         margin-top: 8px;
+        margin-bottom: 6px;
         width: 40px;
         height: 0px;
         border-top: solid 1px #2d253b;
@@ -144,17 +153,20 @@
     }
 
     .select_btn{background: url("images/menu bar/point-N.png")}
-    .select_btn:hover{background: url("images/menu bar/point-S.png")}
-    .select_btn:focus{background: url("images/menu bar/point-H.png")}
+    .select_btn:hover{background: url("images/menu bar/point-H.png")}
+    .select_btn:focus{background: url("images/menu bar/point-S.png")}
 
     .connect_btn{background: url("images/menu bar/connect-N.png")}
-    .connect_btn:hover{background: url("images/menu bar/connect-S.png")}
-    .connect_btn:focus{background: url("images/menu bar/connect-H.png")}
+    .connect_btn:hover{background: url("images/menu bar/connect-H.png")}
+    .connect_btn:focus{background: url("images/menu bar/connect-S.png")}
 
     .point_connect_btn{background: url("images/menu bar/The-point-and-the-connection-N.png")}
-    .point_connect_btn:hover{background: url("images/menu bar/The-point-and-the-connection-S.png")}
-    .point_connect_btn:focus{background: url("images/menu bar/The-point-and-the-connection-H.png")}
+    .point_connect_btn:hover{background: url("images/menu bar/The-point-and-the-connection-H.png")}
+    .point_connect_btn:focus{background: url("images/menu bar/The-point-and-the-connection-S.png")}
 
+    .invert_btn{background: url("images/menu bar/Invert-N.png")}
+    .invert_btn:hover{background: url("images/menu bar/Invert-H.png")}
+    .invert_btn:focus{background: url("images/menu bar/Invert-S.png")}
     .submenu{
         background-color: #454359;
         position: absolute;
@@ -232,12 +244,53 @@
     document.onmouseup = function () {
         isDraging = false;
     };
+
+    function menuHide(klass) {//鼠标离开子菜单区域时隐藏子菜单
+        var t;
+        var thiz;
+
+        $("."+ klass).mouseout(function () {
+            thiz = $(this);
+            t = setTimeout("thiz.toggleClass('hd')",500);
+        });
+
+        $('.'+ klass, '.'+ klass + 'div').mouseover(function(){
+            clearTimeout(t);
+        });
+
+    }
+
+
+
 $(function () {
-    $('[data-toggle="popover"]').popover(); //初始化Bootstrap插件
+//    $('[data-toggle="popover"]').popover(); //初始化Bootstrap插件
 
 //    $(".toggle_btn").click(function () {//显示隐藏按钮
 //        $(this).siblings(".btn-toolbar").animate({width :'toggle'},500)
 //    });
+    menuHide('submenu');
+
+    function menuHide(klass) {//鼠标离开子菜单区域时隐藏子菜单传子菜单“class”
+        var t;
+        var thiz;
+        function hide(thiz) {//传递隐藏函数至setTimeout
+            return function () {
+                _hide(thiz)
+            }
+        }
+        function _hide(thiz) {//隐藏函数
+            thiz.addClass("hd");
+        }
+
+        $("."+ klass).mouseout(function () {//鼠标离开子菜单时隐藏
+            thiz = $(this);
+            t = setTimeout(hide(thiz),200);//延迟200隐藏
+        });
+        $("."+klass+", ."+klass+" div").mouseover(function(){//利用200延迟防止内部div的干扰
+            clearTimeout(t);
+        });
+
+    }
 
     $(".rotate_btn").click(function () {//旋转按钮
         $(this).parent().toggleClass("rotate_90");
@@ -246,23 +299,36 @@ $(function () {
     });
 
 //子菜单显示隐藏
-    $(".sub_btn").click(function(){
-        $(this).siblings(".submenu").toggleClass("hd");
-    });
-//    $(".sub_btn").mouseout(function(){
-//        $(this).sibling(".submenu").toggleClass("hd");
+//    $(".sub_btn").click(function(){
+//        $(this).siblings(".submenu").toggleClass("hd");
 //    });
 //    子菜单选择按钮图标替换
    $(".subkey").click(function () {
        var btn = $(this).children("button");
        var fatherBtn = $(this).parent().siblings("button");
-       var klass = btn.attr("class");
-//       var id = btn.attr("id");
-       fatherBtn.attr("class",klass).addClass("sub_btn");
-       console.log(fatherBtn);
-       fatherBtn.trigger("click");
-   })
-});
+       var klass = "sub_btn " + btn.attr("class");
+       fatherBtn.attr("class",klass).focus();
+//       fatherBtn.trigger("click");
+       $(this).parent().toggleClass("hd");
+   });
+
+    $(".sub_btn").mousedown(function(e){
+        if(3 == e.which){
+            $(this).siblings(".submenu").toggleClass("hd");
+            return false;
+        }else if(1 == e.which){
+            console.log("这 是左键单击事件");
+        }
+    });
+
+    $(".sub_btn").bind("contextmenu",function(e){//阻止右击默认事件
+        return false;
+    });
+
+
+
+
+});//页面载入结束
 
 
 </script>
@@ -275,36 +341,47 @@ $(function () {
             <div class="rotate_btn"></div>
         </div>
         <div class="btn_toolbar flex flex_row" data-toggle="buttons" role="toolbar">
-            <li style="display: block;position: relative;">
-                <button type="button" title="测试" class="btn sub_btn select_btn" id=""></button>
-                <div class="submenu hd">
-                    <div class="subkey flex flex_row" style="">
-                        <div class=" white_square"></div>
-                        <button type="button" class="btn select_btn" id=""></button>
-                        <p class="" style="white-space:nowrap;">选择端点</p>
-                    </div>
-                    <div class="subkey flex flex_row" style="">
-                        <div class="fl white_square"></div>
-                        <button type="button" class="btn connect_btn" id=""></button>
-                        <p class="" style="white-space:nowrap;">选择连接</p>
-                    </div>
-                    <div class="subkey flex flex_row" style="">
-                        <div class="fl white_square"></div>
-                        <button type="button" class="btn point_connect_btn" id=""></button>
-                        <p class="" style="white-space:nowrap;">选择端点和连接</p>
-                    </div>
-                </div>
-            </li>
-            <li style="display: block;"><button type="button" class="btn connect_btn" id="connect_btn"></button></li>
+            {{> sub_btn}}
+                {{> singleBtn posts}}
             <button type="button" class="btn point_connect_btn" id="point_connect_btn"></button>
 
             <div class="dividing_line"></div>
 
+            <button type="button" class="btn invert_btn"></button>
         </div>
 
     </div>
 
 
+</template>
+
+<template name="singleBtn">
+    <li style="display: block;">
+        <button type="button" class="btn connect_btn" title="{{title}}" id="connect_btn"></button>
+    </li>
+</template>
+
+<template name="sub_btn">
+    <li style="display: block;position: relative;">
+        <button type="button" title="测试" class="btn sub_btn select_btn" id=""></button>
+        <div class="submenu hd">
+            <div class="subkey flex flex_row" style="">
+                <div class=" white_square"></div>
+                <button type="button" class="btn select_btn" id=""></button>
+                <p class="" style="white-space:nowrap;">选择端点</p>
+            </div>
+            <div class="subkey flex flex_row" style="">
+                <div class="fl white_square"></div>
+                <button type="button" class="btn connect_btn" id=""></button>
+                <p class="" style="white-space:nowrap;">选择连接</p>
+            </div>
+            <div class="subkey flex flex_row" style="">
+                <div class="fl white_square"></div>
+                <button type="button" class="btn point_connect_btn" id=""></button>
+                <p class="" style="white-space:nowrap;">选择端点和连接</p>
+            </div>
+        </div>
+    </li>
 </template>
 
 
